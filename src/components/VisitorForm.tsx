@@ -24,6 +24,7 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({ onSubmit }) => {
     city: '',
     serviceDate: '',
     serviceTime: '',
+    observations: '',
   });
   const [selectedDate, setSelectedDate] = useState<Date>();
 
@@ -75,6 +76,7 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({ onSubmit }) => {
       city: '',
       serviceDate: '',
       serviceTime: '',
+      observations: '',
     });
     setSelectedDate(undefined);
 
@@ -184,6 +186,20 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({ onSubmit }) => {
                 required
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="observations" className="text-sm font-medium">
+              Observações
+            </Label>
+            <Input
+              id="observations"
+              name="observations"
+              value={formData.observations}
+              onChange={handleInputChange}
+              placeholder="Observações adicionais (opcional)"
+              className="h-12 text-base"
+            />
           </div>
 
           <Button 

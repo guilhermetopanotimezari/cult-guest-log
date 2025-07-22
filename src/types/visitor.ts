@@ -5,6 +5,7 @@ export interface Visitor {
   city: string;
   serviceDate: string;
   serviceTime: string;
+  observations?: string;
   createdAt: string;
 }
 
@@ -14,4 +15,5 @@ export interface VisitorFormData {
   city: string;
   serviceDate: string;
   serviceTime: string;
+  observations?: string;
 }

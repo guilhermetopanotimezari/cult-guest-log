@@ -37,14 +37,12 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
       return;
     }
 
-    const exportData = visitors.map(visitor => ({
-      'Nome Completo': visitor.fullName,
-      'Telefone': visitor.phone,
-      'Cidade': visitor.city,
-      'Data do Culto': visitor.serviceDate,
-      'Horário': visitor.serviceTime,
-      'Data de Cadastro': format(new Date(visitor.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })
-    }));
+    const exportData = visitors.map(visitor => {
+      const period = visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado';
+      return {
+        'Dados': `Culto ${period}: ${visitor.serviceDate}\nNome: ${visitor.fullName}\nFone: ${visitor.phone}\nCidade: ${visitor.city}\nObs: ${visitor.observations || 'Sem observações'}\n`
+      };
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
@@ -72,15 +70,11 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
       return;
     }
 
-    const headers = ['Nome Completo', 'Telefone', 'Cidade', 'Data do Culto', 'Horário', 'Data de Cadastro'];
-    const csvData = visitors.map(visitor => [
-      visitor.fullName,
-      visitor.phone,
-      visitor.city,
-      visitor.serviceDate,
-      visitor.serviceTime,
-      format(new Date(visitor.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })
-    ]);
+    const headers = ['Dados dos Visitantes'];
+    const csvData = visitors.map(visitor => {
+      const period = visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado';
+      return [`Culto ${period}: ${visitor.serviceDate}\nNome: ${visitor.fullName}\nFone: ${visitor.phone}\nCidade: ${visitor.city}\nObs: ${visitor.observations || 'Sem observações'}`];
+    });
 
     const csvContent = [headers, ...csvData]
       .map(row => row.map(cell => `"${cell}"`).join(','))
