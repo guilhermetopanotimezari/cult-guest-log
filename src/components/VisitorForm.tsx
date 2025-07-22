@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CalendarIcon, UserPlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -52,6 +53,10 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({ onSubmit }) => {
         serviceDate: format(date, 'dd/MM/yyyy')
       }));
     }
+  };
+
+  const handleTimeSelect = (time: string) => {
+    setFormData(prev => ({ ...prev, serviceTime: time }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -176,15 +181,16 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({ onSubmit }) => {
               <Label htmlFor="serviceTime" className="text-sm font-medium">
                 Horário do Culto *
               </Label>
-              <Input
-                id="serviceTime"
-                name="serviceTime"
-                type="time"
-                value={formData.serviceTime}
-                onChange={handleInputChange}
-                className="h-12 text-base"
-                required
-              />
+              <Select value={formData.serviceTime} onValueChange={handleTimeSelect}>
+                <SelectTrigger className="h-12 text-base">
+                  <SelectValue placeholder="Selecione o horário" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border shadow-medium">
+                  <SelectItem value="10h">10h</SelectItem>
+                  <SelectItem value="17:00">17:00</SelectItem>
+                  <SelectItem value="19:30">19:30</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
