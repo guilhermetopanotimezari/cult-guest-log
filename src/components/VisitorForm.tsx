@@ -186,9 +186,9 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({ onSubmit }) => {
                   <SelectValue placeholder="Selecione o horário" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border shadow-medium">
-                  <SelectItem value="10h">10h</SelectItem>
-                  <SelectItem value="17:00">17:00</SelectItem>
-                  <SelectItem value="19:30">19:30</SelectItem>
+                  <SelectItem value="10:00">10hrs</SelectItem>
+                  <SelectItem value="17:00">17hrs</SelectItem>
+                  <SelectItem value="19:30">19:30hrs</SelectItem>
                 </SelectContent>
               </Select>
             </div>

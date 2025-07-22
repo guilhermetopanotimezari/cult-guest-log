@@ -109,17 +109,17 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
       return;
     }
 
-    const message = `📋 *Lista de Visitantes da Igreja*\n\n` +
+    const message = `*Lista de Visitantes da Igreja*\n\n` +
       visitors.map((visitor, index) => {
         const period = visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado';
-        return `*${index + 1}.* Culto ${period}: ${visitor.serviceDate}\n` +
+        return `*Culto ${period}: ${visitor.serviceDate}\n` +
                `Nome: ${visitor.fullName}\n` +
                `Fone: ${visitor.phone}\n` +
                `Cidade: ${visitor.city}\n` +
                `Obs: ${visitor.observations || 'Sem observações'}\n`;
       }).join('\n') +
-      `\n🕊️ Total: ${visitors.length} visitante(s)\n` +
-      `📊 Relatório gerado em ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}`;
+      `\nTotal: ${visitors.length} visitante(s)\n` +
+      `Relatório gerado em ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}`;
 
     const cleanNumber = whatsappNumber.replace(/\D/g, '');
     const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
@@ -166,7 +166,7 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
 
         {/* Export Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Button 
+          {/* <Button 
             onClick={exportToExcel}
             variant="outline"
             size="xl"
@@ -183,8 +183,11 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
           >
             <Download className="mr-2 h-4 w-4" />
             Exportar CSV
-          </Button>
+          </Button> */}   
           <div className="flex gap-2">
+            <span className="text-sm">
+            Enviar para o WhatsApp:
+             </span>
             <Input
               placeholder="(11) 99999-9999"
               value={whatsappNumber}
