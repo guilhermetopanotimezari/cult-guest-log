@@ -39,8 +39,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-muted/30 py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3 mb-2">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-3 mb-2">
             <Church className="h-8 w-8 text-primary" />
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
               Cadastro de Visitantes
