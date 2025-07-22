@@ -38,14 +38,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="relative overflow-hidden">
-        <img 
-          src={churchHeader} 
-          alt="Igreja" 
-          className="w-full h-48 sm:h-64 object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-        <div className="absolute bottom-6 left-6 right-6">
+      <div className="bg-muted/30 py-8">
+        <div className="container mx-auto px-4">
           <div className="flex items-center gap-3 mb-2">
             <Church className="h-8 w-8 text-primary" />
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
