@@ -110,12 +110,14 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
     }
 
     const message = `📋 *Lista de Visitantes da Igreja*\n\n` +
-      visitors.map((visitor, index) => 
-        `*${index + 1}.* ${visitor.fullName}\n` +
-        `📞 ${visitor.phone}\n` +
-        `🏙️ ${visitor.city}\n` +
-        `📅 ${visitor.serviceDate} às ${visitor.serviceTime}\n`
-      ).join('\n') +
+      visitors.map((visitor, index) => {
+        const period = visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado';
+        return `*${index + 1}.* Culto ${period}: ${visitor.serviceDate}\n` +
+               `Nome: ${visitor.fullName}\n` +
+               `Fone: ${visitor.phone}\n` +
+               `Cidade: ${visitor.city}\n` +
+               `Obs: ${visitor.observations || 'Sem observações'}\n`;
+      }).join('\n') +
       `\n🕊️ Total: ${visitors.length} visitante(s)\n` +
       `📊 Relatório gerado em ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}`;
 
