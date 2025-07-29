@@ -145,9 +145,32 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
   return (
     <Card className="shadow-medium">
       <CardHeader className="gradient-card">
-        <CardTitle className="flex items-center gap-2 text-primary">
-          <Users className="h-5 w-5" />
-          Lista de Visitantes ({visitors.length})
+        <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-primary">
+            <Users className="h-5 w-5" />
+            Lista de Visitantes ({visitors.length})
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+            <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
+              Enviar para o WhatsApp:
+            </span>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Input
+                placeholder="(11) 99999-9999"
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value)}
+                className="h-9 text-sm min-w-[140px]"
+              />
+              <Button 
+                onClick={sendToWhatsApp}
+                size="sm"
+                className="px-3 bg-green-600 hover:bg-green-700 shrink-0"
+                disabled={visitors.length === 0}
+              >
+                <MessageCircle className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
@@ -164,46 +187,6 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
           </div>
         </div>
 
-        {/* Export Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* <Button 
-            onClick={exportToExcel}
-            variant="outline"
-            size="xl"
-            disabled={visitors.length === 0}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Exportar Excel
-          </Button>
-          <Button 
-            onClick={exportToCSV}
-            variant="outline"
-            size="xl"
-            disabled={visitors.length === 0}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Exportar CSV
-          </Button> */}   
-          <div className="flex gap-2">
-            <span className="text-sm">
-            Enviar para o WhatsApp:
-             </span>
-            <Input
-              placeholder="(11) 99999-9999"
-              value={whatsappNumber}
-              onChange={(e) => setWhatsappNumber(e.target.value)}
-              className="h-12 text-sm"
-            />
-            <Button 
-              onClick={sendToWhatsApp}
-              size="xl"
-              className="px-4 bg-green-600 hover:bg-green-700"
-              disabled={visitors.length === 0}
-            >
-              <MessageCircle className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
 
         {/* Visitors List */}
         <div className="space-y-3">
