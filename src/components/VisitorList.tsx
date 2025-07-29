@@ -142,6 +142,16 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
     }
   };
 
+  const handleDeleteAll = () => {
+    if (window.confirm(`Deseja realmente excluir todos os ${visitors.length} visitantes? Esta ação não pode ser desfeita.`)) {
+      visitors.forEach(visitor => onDeleteVisitor(visitor.id));
+      toast({
+        title: "Todos os visitantes excluídos",
+        description: `${visitors.length} visitantes foram removidos da lista.`,
+      });
+    }
+  };
+
   return (
     <Card className="shadow-medium">
       <CardHeader className="gradient-card">
@@ -236,6 +246,23 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
             ))
           )}
         </div>
+
+        {/* Delete All Button */}
+        {visitors.length > 1 && (
+          <div className="pt-4 border-t">
+            <div className="flex justify-center">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteAll}
+                className="gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Remover Todos os Visitantes ({visitors.length})
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
