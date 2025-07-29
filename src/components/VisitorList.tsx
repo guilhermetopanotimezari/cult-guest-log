@@ -109,16 +109,33 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
       return;
     }
 
+    // Gerar planilha Excel
+    const exportData = visitors.map(visitor => ({
+      'Data do Culto': visitor.serviceDate,
+      'Horário': visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado',
+      'Nome Completo': visitor.fullName,
+      'Telefone': visitor.phone,
+      'Cidade': visitor.city,
+      'Observações': visitor.observations || 'Sem observações',
+      'Data de Cadastro': format(new Date(visitor.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Visitantes');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    
+    const fileName = `visitantes_${format(new Date(), 'dd-MM-yyyy_HH-mm')}.xlsx`;
+    saveAs(data, fileName);
+
+    // Preparar mensagem para WhatsApp
     const message = `*Lista de Visitantes da Igreja*\n\n` +
-      visitors.map((visitor, index) => {
-        const period = visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado';
-        return `*Culto ${period}: ${visitor.serviceDate}\n` +
-               `Nome: ${visitor.fullName}\n` +
-               `Fone: ${visitor.phone}\n` +
-               `Cidade: ${visitor.city}\n` +
-               `Obs: ${visitor.observations || 'Sem observações'}\n`;
-      }).join('\n') +
-      `\nTotal: ${visitors.length} visitante(s)\n` +
+      `📊 Planilha gerada com ${visitors.length} visitante(s)\n` +
+      `📅 Período: ${visitors[0]?.serviceDate} - ${visitors[visitors.length - 1]?.serviceDate}\n` +
+      `📁 Arquivo: ${fileName}\n\n` +
+      `A planilha foi baixada automaticamente em seu dispositivo.\n` +
       `Relatório gerado em ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}`;
 
     const cleanNumber = whatsappNumber.replace(/\D/g, '');
@@ -127,8 +144,8 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
     window.open(whatsappUrl, '_blank');
 
     toast({
-      title: "WhatsApp aberto!",
-      description: "A mensagem foi preparada para envio.",
+      title: "Planilha gerada e WhatsApp aberto!",
+      description: `Arquivo ${fileName} baixado. Mensagem preparada para envio.`,
     });
   };
 
