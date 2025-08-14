@@ -10,6 +10,7 @@ import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { supabase } from '@/integrations/supabase/client';
 
 interface VisitorListProps {
   visitors: Visitor[];
@@ -27,7 +28,7 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
     visitor.phone.includes(searchTerm)
   );
 
-  const downloadExcel = () => {
+  const downloadExcel = async () => {
     if (visitors.length === 0) {
       toast({
         title: "Lista vazia",
@@ -37,33 +38,67 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
       return;
     }
 
-    const exportData = visitors.map(visitor => ({
-      'Data do Culto': visitor.serviceDate,
-      'Horário': visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado',
-      'Nome Completo': visitor.fullName,
-      'Telefone': visitor.phone,
-      'Cidade': visitor.city,
-      'Observações': visitor.observations || 'Sem observações',
-      'Data de Cadastro': format(new Date(visitor.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })
-    }));
+    try {
+      // Insert visitors into database
+      const visitorsToInsert = visitors.map(visitor => ({
+        full_name: visitor.fullName,
+        phone: visitor.phone,
+        city: visitor.city,
+        service_date: visitor.serviceDate,
+        service_time: visitor.serviceTime,
+        observations: visitor.observations || null,
+      }));
 
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Visitantes');
+      const { error } = await supabase
+        .from('visitors')
+        .insert(visitorsToInsert);
 
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    
-    const fileName = `visitantes_${format(new Date(), 'dd-MM-yyyy_HH-mm')}.xlsx`;
-    saveAs(data, fileName);
+      if (error) {
+        console.error('Error inserting visitors:', error);
+        toast({
+          title: "Erro ao salvar",
+          description: "Não foi possível salvar os visitantes no banco de dados.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    toast({
-      title: "Planilha baixada!",
-      description: `Arquivo ${fileName} baixado com sucesso.`,
-    });
+      // Generate Excel file
+      const exportData = visitors.map(visitor => ({
+        'Data do Culto': visitor.serviceDate,
+        'Horário': visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado',
+        'Nome Completo': visitor.fullName,
+        'Telefone': visitor.phone,
+        'Cidade': visitor.city,
+        'Observações': visitor.observations || 'Sem observações',
+        'Data de Cadastro': format(new Date(visitor.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })
+      }));
 
-    // Limpar a lista após o download
-    onClearAllVisitors();
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Visitantes');
+
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const fileName = `visitantes_${format(new Date(), 'dd-MM-yyyy_HH-mm')}.xlsx`;
+      saveAs(data, fileName);
+
+      toast({
+        title: "Planilha baixada!",
+        description: `Visitantes salvos no banco de dados e arquivo ${fileName} baixado com sucesso.`,
+      });
+
+      // Clear the list after successful download and database save
+      onClearAllVisitors();
+    } catch (error) {
+      console.error('Error during download process:', error);
+      toast({
+        title: "Erro inesperado",
+        description: "Ocorreu um erro durante o processo de download.",
+        variant: "destructive",
+      });
+    }
   };
 
 
