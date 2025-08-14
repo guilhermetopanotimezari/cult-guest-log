@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Search, Download, MessageCircle, Trash2 } from 'lucide-react';
+import { Users, Search, Download, Trash2 } from 'lucide-react';
 import { Visitor } from '@/types/visitor';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -14,12 +14,12 @@ import { saveAs } from 'file-saver';
 interface VisitorListProps {
   visitors: Visitor[];
   onDeleteVisitor: (id: string) => void;
+  onClearAllVisitors: () => void;
 }
 
-export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisitor }) => {
+export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisitor, onClearAllVisitors }) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [whatsappNumber, setWhatsappNumber] = useState('');
 
   const filteredVisitors = visitors.filter(visitor =>
     visitor.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -27,7 +27,7 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
     visitor.phone.includes(searchTerm)
   );
 
-  const exportToExcel = () => {
+  const downloadExcel = () => {
     if (visitors.length === 0) {
       toast({
         title: "Lista vazia",
@@ -37,79 +37,6 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
       return;
     }
 
-    const exportData = visitors.map(visitor => {
-      const period = visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado';
-      return {
-        'Dados': `Culto ${period}: ${visitor.serviceDate}\nNome: ${visitor.fullName}\nFone: ${visitor.phone}\nCidade: ${visitor.city}\nObs: ${visitor.observations || 'Sem observações'}\n`
-      };
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Visitantes');
-
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    
-    const fileName = `visitantes_${format(new Date(), 'dd-MM-yyyy_HH-mm')}.xlsx`;
-    saveAs(data, fileName);
-
-    toast({
-      title: "Planilha exportada!",
-      description: `Arquivo ${fileName} baixado com sucesso.`,
-    });
-  };
-
-  const exportToCSV = () => {
-    if (visitors.length === 0) {
-      toast({
-        title: "Lista vazia",
-        description: "Não há visitantes para exportar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const headers = ['Dados dos Visitantes'];
-    const csvData = visitors.map(visitor => {
-      const period = visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado';
-      return [`Culto ${period}: ${visitor.serviceDate}\nNome: ${visitor.fullName}\nFone: ${visitor.phone}\nCidade: ${visitor.city}\nObs: ${visitor.observations || 'Sem observações'}`];
-    });
-
-    const csvContent = [headers, ...csvData]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const fileName = `visitantes_${format(new Date(), 'dd-MM-yyyy_HH-mm')}.csv`;
-    saveAs(blob, fileName);
-
-    toast({
-      title: "CSV exportado!",
-      description: `Arquivo ${fileName} baixado com sucesso.`,
-    });
-  };
-
-  const sendToWhatsApp = () => {
-    if (!whatsappNumber) {
-      toast({
-        title: "Número necessário",
-        description: "Digite um número do WhatsApp para enviar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (visitors.length === 0) {
-      toast({
-        title: "Lista vazia",
-        description: "Não há visitantes para enviar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Gerar planilha Excel
     const exportData = visitors.map(visitor => ({
       'Data do Culto': visitor.serviceDate,
       'Horário': visitor.serviceTime ? `${visitor.serviceTime}h` : 'Não informado',
@@ -130,24 +57,15 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
     const fileName = `visitantes_${format(new Date(), 'dd-MM-yyyy_HH-mm')}.xlsx`;
     saveAs(data, fileName);
 
-    // Preparar mensagem para WhatsApp
-    const message = `*Lista de Visitantes da Igreja*\n\n` +
-      `📊 Planilha gerada com ${visitors.length} visitante(s)\n` +
-      `📅 Período: ${visitors[0]?.serviceDate} - ${visitors[visitors.length - 1]?.serviceDate}\n` +
-      `📁 Arquivo: ${fileName}\n\n` +
-      `A planilha foi baixada automaticamente em seu dispositivo.\n` +
-      `Relatório gerado em ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}`;
-
-    const cleanNumber = whatsappNumber.replace(/\D/g, '');
-    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
-    
-    window.open(whatsappUrl, '_blank');
-
     toast({
-      title: "Planilha gerada e WhatsApp aberto!",
-      description: `Arquivo ${fileName} baixado. Mensagem preparada para envio.`,
+      title: "Planilha baixada!",
+      description: `Arquivo ${fileName} baixado com sucesso.`,
     });
+
+    // Limpar a lista após o download
+    onClearAllVisitors();
   };
+
 
   const handleDelete = (id: string, name: string) => {
     if (window.confirm(`Deseja realmente excluir o visitante ${name}?`)) {
@@ -177,26 +95,19 @@ export const VisitorList: React.FC<VisitorListProps> = ({ visitors, onDeleteVisi
             <Users className="h-5 w-5" />
             Lista de Visitantes ({visitors.length})
           </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-            <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
-              Enviar para o WhatsApp:
-            </span>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Input
-                placeholder="(11) 99999-9999"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
-                className="h-9 text-sm min-w-[140px]"
-              />
-              <Button 
-                onClick={sendToWhatsApp}
-                size="sm"
-                className="px-3 bg-green-600 hover:bg-green-700 shrink-0"
-                disabled={visitors.length === 0}
-              >
-                <MessageCircle className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex flex-col items-end gap-2">
+            <Button 
+              onClick={downloadExcel}
+              size="sm"
+              className="px-4 gap-2"
+              disabled={visitors.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              Download da planilha
+            </Button>
+            <p className="text-xs text-muted-foreground text-right">
+              Faça o download da lista após o término dos cadastros de visitantes
+            </p>
           </div>
         </CardTitle>
       </CardHeader>

@@ -3,7 +3,7 @@ import { VisitorForm } from '@/components/VisitorForm';
 import { VisitorList } from '@/components/VisitorList';
 import { Visitor, VisitorFormData } from '@/types/visitor';
 import churchHeader from '@/assets/church-header.jpg';
-import { Church } from 'lucide-react';
+import igrejaIcon from '@/assets/igreja-icon.png';
 
 const Index = () => {
   const [visitors, setVisitors] = useState<Visitor[]>([]);
@@ -35,19 +35,23 @@ const Index = () => {
     setVisitors(prev => prev.filter(visitor => visitor.id !== id));
   };
 
+  const handleClearAllVisitors = () => {
+    setVisitors([]);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-muted/30 py-8">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-3 mb-2">
-            <Church className="h-8 w-8 text-primary" />
+            <img src={igrejaIcon} alt="Igreja" className="h-8 w-8" />
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
               Cadastro de Visitantes
             </h1>
           </div>
           <p className="text-muted-foreground text-sm sm:text-base">
-            Sistema simples para registrar visitantes da igreja
+            Ministério Primeira Vez - Igreja das Nações
           </p>
         </div>
       </div>
@@ -62,6 +66,7 @@ const Index = () => {
           <VisitorList 
             visitors={visitors} 
             onDeleteVisitor={handleDeleteVisitor}
+            onClearAllVisitors={handleClearAllVisitors}
           />
         </div>
       </div>
